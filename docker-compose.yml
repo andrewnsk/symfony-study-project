@@ -1,0 +1,42 @@
+version: '2'
+services:
+  db:
+    image: mysql/mysql-server:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: smartgo
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: blog
+      MYSQL_USER: smartgo
+      MYSQL_PASSWORD: smartgo
+    ports:
+      - "3336:3306"
+
+  php:
+    image: php:7.2-fpm
+    restart: always
+
+    volumes:
+        - ./:/code
+    links:
+      - db
+    environment:
+      MYSQL_ROOT_PASSWORD: smartgo
+      MYSQL_DATABASE: blog
+      MYSQL_USER: smartgo
+      MYSQL_PASSWORD: smartgo
+
+  web:
+    image: nginx
+    restart: always
+    volumes:
+     - ./deploy_conf/nginx.conf:/etc/nginx/nginx.conf
+     - ./deploy_conf/default.conf:/etc/nginx/conf.d/default.conf
+     - ./:/code
+
+    links:
+      - php
+    ports:
+     - "8080:80"
+    environment:
+     - NGINX_PORT=80
